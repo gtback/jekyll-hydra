@@ -1,0 +1,38 @@
+<html>
+  <head>
+    <title>Hydra</title>
+  </head>
+  <body>
+    <h1>Hydra</h1>
+    <form action="{{ url_for('home') }}" method="post">
+      {{ form.repository.label }}: {{ form.repository }}<br />
+      {{ form.branch.label }}: {{ form.branch }}<br />
+      <button type="submit" title="Submit"><span>Submit</span></button>
+      {{ form.csrf_token }}
+    </form>
+    {% for i in inst %}
+    {% if loop.first %}
+    <table>
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Branch</th>
+          <th>Port</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+    {% endif %}
+        <tr>
+          <td>{{ i.repository }}</td>
+          <td>{{ i.branch }}</td>
+          <td>{{ i.status }}</td>
+          <td>{{ i.port }}</td>
+        </tr>
+    {% if loop.last %}
+      </tbody>
+    </table>
+    {% endif %}
+    {% endfor %}
+  </body>
+</html>
