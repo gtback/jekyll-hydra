@@ -18,6 +18,7 @@ app.config.from_object('config')
 app.config.from_pyfile('config.py')
 
 START_PORT = 4000
+HOST_NAME = "localhost"
 
 Bootstrap(app)
 db = SQLAlchemy(app)
@@ -50,6 +51,10 @@ class Instance(db.Model):
 
     def __str__(self):
         return "{0.repository} - {0.branch}".format(self)
+
+    @property
+    def link(self):
+        return "http://{0}:{1}/".format(HOST_NAME, self.port)
 
 class SubmitForm(Form):
     repository = TextField('Repository', validators=[Required()])

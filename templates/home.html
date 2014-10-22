@@ -31,6 +31,7 @@
         <th>Branch</th>
         <th>Status</th>
         <th>Port</th>
+        <th>View</th>
       </tr>
     </thead>
     <tbody>
@@ -40,6 +41,11 @@
         <td>{{ i.branch }}</td>
         <td>{{ i.status }}</td>
         <td>{{ i.port }}</td>
+        <td>
+        {% if i.status == "Serving" %}
+          <a class="btn btn-sm btn-primary" href="{{ i.link }}">View</a>
+        {% endif %}
+        </td>
       </tr>
   {% if loop.last %}
     </tbody>
