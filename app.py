@@ -24,7 +24,6 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    #Instance.query.delete()
     form = SubmitForm()
     if form.validate_on_submit():
         i = Instance(repository=form.repository.data,
@@ -121,6 +120,9 @@ def run_it(instance_id):
 
 
 if __name__ == '__main__':
+    # Clear the database
+    # Instance.query.delete()
+
     # Mark all old session as dead
     db.session.query(Instance).update({'status': "Dead", 'port': None})
     db.session.commit()
