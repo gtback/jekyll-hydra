@@ -18,7 +18,6 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    Instance.query.delete()
     form = SubmitForm()
     if form.validate_on_submit():
         i = Instance(repository=form.repository.data,
