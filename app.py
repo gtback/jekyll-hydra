@@ -8,6 +8,8 @@ from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.wtf import Form
 
+from flask_bootstrap import Bootstrap
+
 from wtforms.fields import TextField
 from wtforms.validators import Required
 
@@ -17,6 +19,7 @@ app.config.from_pyfile('config.py')
 
 START_PORT = 4000
 
+Bootstrap(app)
 db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])

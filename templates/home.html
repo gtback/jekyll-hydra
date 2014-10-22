@@ -1,38 +1,50 @@
-<html>
-  <head>
-    <title>Hydra</title>
-  </head>
-  <body>
-    <h1>Hydra</h1>
-    <form action="{{ url_for('home') }}" method="post">
-      {{ form.repository.label }}: {{ form.repository }}<br />
-      {{ form.branch.label }}: {{ form.branch }}<br />
-      <button type="submit" title="Submit"><span>Submit</span></button>
-      {{ form.csrf_token }}
-    </form>
-    {% for i in inst %}
-    {% if loop.first %}
-    <table>
-      <thead>
-        <tr>
-          <th>Repository</th>
-          <th>Branch</th>
-          <th>Status</th>
-          <th>Port</th>
-        </tr>
-      </thead>
-      <tbody>
-    {% endif %}
-        <tr>
-          <td>{{ i.repository }}</td>
-          <td>{{ i.branch }}</td>
-          <td>{{ i.status }}</td>
-          <td>{{ i.port }}</td>
-        </tr>
-    {% if loop.last %}
-      </tbody>
-    </table>
-    {% endif %}
-    {% endfor %}
-  </body>
-</html>
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}Hydra{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+  <!-- ... -->
+</div>
+{% endblock %}`
+
+{% block content %}
+<div class="container">
+  <h1>Hydra</h1>
+
+  <h2>Make new instance</h2>
+  <form action="{{ url_for('home') }}" method="post">
+    {{ wtf.form_field(form.repository) }}
+    {{ wtf.form_field(form.branch) }}
+    <button class="btn btn-success" type="submit" title="Submit"><span>Submit</span></button>
+    {{ form.csrf_token }}
+  </form>
+
+  <h2>Existing instances</h2>
+  {% for i in inst %}
+  {% if loop.first %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Repository</th>
+        <th>Branch</th>
+        <th>Status</th>
+        <th>Port</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% endif %}
+      <tr>
+        <td>{{ i.repository }}</td>
+        <td>{{ i.branch }}</td>
+        <td>{{ i.status }}</td>
+        <td>{{ i.port }}</td>
+      </tr>
+  {% if loop.last %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}
