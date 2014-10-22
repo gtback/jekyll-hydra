@@ -21,6 +21,7 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    #Instance.query.delete()
     form = SubmitForm()
     if form.validate_on_submit():
         i = Instance(repository=form.repository.data,
@@ -29,7 +30,7 @@ def home():
         db.session.commit()
 
         print("running it...")
-        t = threading.Thread(target=run_it, args=[i.repository, i.branch])
+        t = threading.Thread(target=run_it, args=[i.id])
         t.start()
 
         return redirect(url_for('home'))
@@ -82,15 +83,18 @@ def find_port():
     return port
 
 
-def run_it(repository, branch):
-    repository = repository.strip()
-    branch = branch.strip()
-    with tempfile.TemporaryDirectory() as tmpdirname:
+def run_it(instance_id):
+    with app.app_context(), tempfile.TemporaryDirectory() as tmpdirname:
+        i = db.session.query(Instance).get(instance_id)
+        repository = i.repository.strip()
+        branch = i.branch.strip()
+
         print("Created temporary directory", tmpdirname)
         repo_dir = os.path.join(tmpdirname, 'repo')
 
         # Clone the repo
-        print("Cloning")
+        i.status = "Cloning"
+        db.session.commit()
         args = ['git', 'clone', repository, repo_dir]
         print_args(args)
         subprocess.call(args)
@@ -104,6 +108,9 @@ def run_it(repository, branch):
         subprocess.call(args)
 
         port = find_port()
+        i.port = port
+        i.status = "Serving"
+        db.session.commit()
         print("Serving using port %d" % port)
         args = ['jekyll', 'serve', '-P', str(port)]
         print_args(args)
@@ -111,4 +118,7 @@ def run_it(repository, branch):
 
 
 if __name__ == '__main__':
+    # Mark all old session as dead
+    db.session.query(Instance).update({'status': "Dead", 'port': None})
+    db.session.commit()
     app.run(debug=True)
