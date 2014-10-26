@@ -110,7 +110,12 @@ def run_it(instance_id):
         db.session.commit()
         args = ['git', 'clone', repository, repo_dir]
         print_args(args)
-        subprocess.call(args)
+        try:
+            subprocess.check_call(args)
+        except subprocess.CalledProcessError:
+            i.status = "Error"
+            db.session.commit()
+            return
 
         # Change into the repo directory
         os.chdir(repo_dir)
@@ -118,7 +123,12 @@ def run_it(instance_id):
         # Check out the desired branch
         args = ['git', 'checkout', branch]
         print_args(args)
-        subprocess.call(args)
+        try:
+            subprocess.check_call(args)
+        except subprocess.CalledProcessError:
+            i.status = "Error"
+            db.session.commit()
+            return
 
         port = find_port()
         i.port = port
@@ -127,7 +137,12 @@ def run_it(instance_id):
         print("Serving using port %d" % port)
         args = ['jekyll', 'serve', '-P', str(port)]
         print_args(args)
-        subprocess.call(args)
+        try:
+            subprocess.check_call(args)
+        except subprocess.CalledProcessError:
+            i.status = "Error"
+            db.session.commit()
+            return
 
 
 if __name__ == '__main__':
