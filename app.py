@@ -11,7 +11,7 @@ from flask.ext.wtf import Form
 from flask_bootstrap import Bootstrap
 
 from wtforms.fields import TextField
-from wtforms.validators import Required
+from wtforms.validators import Required, ValidationError
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_object('config')
@@ -19,6 +19,7 @@ app.config.from_pyfile('config.py')
 
 START_PORT = 4000
 HOST_NAME = "localhost"
+SUBMIT_KEY = os.environ["SUBMIT_KEY"]
 
 Bootstrap(app)
 db = SQLAlchemy(app)
@@ -59,6 +60,11 @@ class Instance(db.Model):
 class SubmitForm(Form):
     repository = TextField('Repository', validators=[Required()])
     branch = TextField('Branch', validators=[Required()])
+    key = TextField('Submit Key', validators=[Required()])
+
+    def validate_key(form, field):
+        if field.data != SUBMIT_KEY:
+            raise ValidationError("Invalid Submission Key")
 
 
 def print_args(args):

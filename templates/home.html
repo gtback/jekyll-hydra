@@ -17,6 +17,7 @@
   <form action="{{ url_for('home') }}" method="post">
     {{ wtf.form_field(form.repository) }}
     {{ wtf.form_field(form.branch) }}
+    {{ wtf.form_field(form.key) }}
     <button class="btn btn-success" type="submit" title="Submit"><span>Submit</span></button>
     {{ form.csrf_token }}
   </form>
