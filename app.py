@@ -19,7 +19,7 @@ app.config.from_pyfile('config.py')
 
 START_PORT = 4000
 HOST_NAME = "localhost"
-SUBMIT_KEY = os.environ["SUBMIT_KEY"]
+SUBMIT_KEY = app.config["SUBMIT_KEY"]
 
 Bootstrap(app)
 db = SQLAlchemy(app)
