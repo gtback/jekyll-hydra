@@ -4,6 +4,7 @@ import threading
 import socket
 import subprocess
 
+from celery import Celery
 from flask import Flask, render_template, redirect, url_for
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.wtf import Form
@@ -22,7 +23,9 @@ HOST_NAME = "localhost"
 SUBMIT_KEY = app.config["SUBMIT_KEY"]
 
 Bootstrap(app)
+
 db = SQLAlchemy(app)
+celery = Celery('app', broker="amqp://localhost")
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -34,8 +37,7 @@ def home():
         db.session.commit()
 
         print("running it...")
-        t = threading.Thread(target=run_it, args=[i.id])
-        t.start()
+        run_it.delay(i.id)
 
         return redirect(url_for('home'))
 
@@ -96,6 +98,7 @@ def find_port():
     return port
 
 
+@celery.task
 def run_it(instance_id):
     with app.app_context(), tempfile.TemporaryDirectory() as tmpdirname:
         i = db.session.query(Instance).get(instance_id)
