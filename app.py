@@ -1,3 +1,5 @@
+from http.server import HTTPServer, SimpleHTTPRequestHandler
+import logging
 import os
 import tempfile
 import threading
@@ -19,13 +21,22 @@ app.config.from_object('config')
 app.config.from_pyfile('config.py')
 
 START_PORT = 4000
-HOST_NAME = "localhost"
+HOST_NAME = app.config["HOST"]
 SUBMIT_KEY = app.config["SUBMIT_KEY"]
+
+logger = logging.getLogger('hydra')
 
 Bootstrap(app)
 
 db = SQLAlchemy(app)
 celery = Celery('app', broker="amqp://localhost")
+
+# Set up application logging
+if not app.debug:
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(logging.INFO)
+    app.logger.addHandler(stream_handler)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -36,7 +47,7 @@ def home():
         db.session.add(i)
         db.session.commit()
 
-        print("running it...")
+        logger.info("running it...")
         run_it.delay(i.id)
 
         return redirect(url_for('home'))
@@ -70,9 +81,9 @@ class SubmitForm(Form):
 
 
 def print_args(args):
-    print("-" * 40)
-    print(' '.join(args))
-    print("-" * 40)
+    logger.info("-" * 40)
+    logger.info(' '.join(args))
+    logger.info("-" * 40)
 
 
 def find_port():
@@ -83,12 +94,12 @@ def find_port():
     while not found:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = s.connect_ex(('127.0.0.1', port))
-        print(result)
-        if result == 61:
-            print("Port %d is available" % port)
+        logger.debug(result)
+        if result in (61, 111):
+            logger.info("Port %d is available" % port)
             found = True
         else:
-            print("Port %d in use" % port)
+            logger.info("Port %d in use" % port)
             port = port + 1
 
         s.close()
@@ -105,7 +116,7 @@ def run_it(instance_id):
         repository = i.repository.strip()
         branch = i.branch.strip()
 
-        print("Created temporary directory", tmpdirname)
+        logger.info("Created temporary directory %s" % tmpdirname)
         repo_dir = os.path.join(tmpdirname, 'repo')
 
         # Clone the repo
@@ -133,12 +144,9 @@ def run_it(instance_id):
             db.session.commit()
             return
 
-        port = find_port()
-        i.port = port
-        i.status = "Serving"
+        i.status = "Building"
         db.session.commit()
-        print("Serving using port %d" % port)
-        args = ['jekyll', 'serve', '-P', str(port)]
+        args = ['jekyll', 'build']
         print_args(args)
         try:
             subprocess.check_call(args)
@@ -147,12 +155,29 @@ def run_it(instance_id):
             db.session.commit()
             return
 
+        site_dir = os.path.join(repo_dir, "_site")
+        os.chdir(site_dir)
+        logger.info(site_dir)
 
-if __name__ == '__main__':
-    # Clear the database
-    # Instance.query.delete()
+        port = find_port()
+        i.port = port
+        i.status = "Serving"
+        db.session.commit()
+        logger.info("Serving using port %d" % port)
 
-    # Mark all old session as dead
+        server_address = ('', port)
+        httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+        httpd.serve_forever()
+
+# Clear the database
+# Instance.query.delete()
+
+# Mark all old session as dead
+try:
     db.session.query(Instance).update({'status': "Dead", 'port': None})
     db.session.commit()
+except:
+    pass
+
+if __name__ == '__main__':
     app.run(debug=True)
