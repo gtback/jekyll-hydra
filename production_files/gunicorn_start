@@ -1,0 +1,36 @@
+#!/bin/bash
+
+NAME="hydra"
+FLASKDIR=/opt/hydra/jekyll-hydra
+VENVDIR=/opt/hydra/venv
+SOCKFILE=/opt/hydra/sock
+USER=hydra
+GROUP=hydra
+NUM_WORKERS=3
+
+echo "Starting $NAME"
+
+# activate the virtualenv
+cd $VENVDIR
+source bin/activate
+
+export PYTHONPATH=$FLASKDIR:$PYTHONPATH
+
+# Create the run directory if it doesn't exist
+RUNDIR=$(dirname $SOCKFILE)
+test -d $RUNDIR || mkdir -p $RUNDIR
+
+# Load RVM (for jekyll)
+source /etc/profile.d/rvm.sh
+
+# Start your unicorn
+exec gunicorn app:app -b 127.0.0.1:5000 \
+  --name $NAME \
+  --workers $NUM_WORKERS \
+  --user=$USER --group=$GROUP \
+  --log-level=debug \
+  --access-logfile=- \
+  --log-file=- \
+  --log-config=/opt/hydra/jekyll-hydra/logging.conf \
+#  --check-config \
+  --bind=unix:$SOCKFILE

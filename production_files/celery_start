@@ -1,0 +1,21 @@
+#!/bin/bash
+
+NAME="hydra-celery"
+FLASKDIR=/opt/hydra/jekyll-hydra
+VENVDIR=/opt/hydra/venv
+NUM_WORKERS=10
+
+echo "Starting $NAME"
+
+# activate the virtualenv
+cd $VENVDIR
+source bin/activate
+#
+# Load RVM (for jekyll)
+source /etc/profile.d/rvm.sh
+
+export PYTHONPATH=$FLASKDIR:$PYTHONPATH
+
+exec celery -A app:celery worker \
+  --concurrency $NUM_WORKERS \
+  --loglevel INFO
