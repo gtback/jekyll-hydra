@@ -3,7 +3,7 @@
 NAME="hydra"
 FLASKDIR=/opt/hydra/jekyll-hydra
 VENVDIR=/opt/hydra/venv
-SOCKFILE=/opt/hydra/sock
+SOCKFILE=/var/hydra/sock
 USER=hydra
 GROUP=hydra
 NUM_WORKERS=3
@@ -31,6 +31,5 @@ exec gunicorn app:app -b 127.0.0.1:5000 \
   --log-level=debug \
   --access-logfile=- \
   --log-file=- \
-  --log-config=/opt/hydra/jekyll-hydra/logging.conf \
 #  --check-config \
   --bind=unix:$SOCKFILE
