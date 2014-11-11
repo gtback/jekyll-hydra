@@ -45,6 +45,7 @@ def home():
     if form.validate_on_submit():
         i = Instance(repository=form.repository.data,
                      branch=form.branch.data)
+        i.status = "Submitted"
         db.session.add(i)
         db.session.commit()
 
@@ -56,6 +57,28 @@ def home():
     inst = Instance.query.all()
 
     return render_template('home.html', form=form, inst=inst)
+
+@app.route('/kill/<id>', methods=['POST'])
+def kill(id):
+    logger.info("Killing instance " + str(id))
+    i = db.session.query(Instance).get(id)
+    i.port = None
+    i.status = "Killed"
+
+    #TODO: remove files from disk
+    db.session.commit()
+
+    return redirect(url_for('home'))
+
+@app.route('/rebuild/<id>', methods=['POST'])
+def rebuild(id):
+    logger.info("Rebuilding instance" + str(id))
+    i = db.session.query(Instance).get(id)
+    i.status = "Resubmitted"
+    db.session.commit()
+    run_it.delay(i.id)
+
+    return redirect(url_for('home'))
 
 class Instance(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
