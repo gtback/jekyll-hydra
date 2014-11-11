@@ -119,7 +119,7 @@ def find_port():
     logger.info(ports)
     logger.info("-" * 40)
 
-    for x in range(START_PORT, START_PORT + 4):
+    for x in range(START_PORT, START_PORT + 10):
         if x not in ports:
             return x
 

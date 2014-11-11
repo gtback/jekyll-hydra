@@ -33,3 +33,45 @@ server {
         root /var/hydra/build/4003;
     }
 }
+
+server {
+    listen 4004;
+    location / {
+        root /var/hydra/build/4004;
+    }
+}
+
+server {
+    listen 4005;
+    location / {
+        root /var/hydra/build/4005;
+    }
+}
+
+server {
+    listen 4006;
+    location / {
+        root /var/hydra/build/4006;
+    }
+}
+
+server {
+    listen 4007;
+    location / {
+        root /var/hydra/build/4007;
+    }
+}
+
+server {
+    listen 4008;
+    location / {
+        root /var/hydra/build/4008;
+    }
+}
+
+server {
+    listen 4009;
+    location / {
+        root /var/hydra/build/4009;
+    }
+}
