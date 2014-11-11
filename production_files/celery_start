@@ -3,7 +3,7 @@
 NAME="hydra-celery"
 FLASKDIR=/opt/hydra/jekyll-hydra
 VENVDIR=/opt/hydra/venv
-NUM_WORKERS=10
+NUM_WORKERS=2
 
 echo "Starting $NAME"
 
