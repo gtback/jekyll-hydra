@@ -43,7 +43,7 @@
         <td>{{ i.status }}</td>
         <td>{{ i.port }}</td>
         <td>
-        {% if i.status == "Serving" %}
+        {% if i.status == "Running" %}
           <a class="btn btn-sm btn-primary" href="{{ i.link }}">View</a>
         {% endif %}
         </td>

@@ -23,6 +23,7 @@ app.config.from_pyfile('config.py')
 START_PORT = 4000
 HOST_NAME = app.config["HOST"]
 SUBMIT_KEY = app.config["SUBMIT_KEY"]
+OUTPUT_BASE_DIR = "/var/hydra/build/"
 
 logger = logging.getLogger('hydra')
 
@@ -88,25 +89,18 @@ def print_args(args):
 
 def find_port():
     """Find an open TCP port, starting at 4000 and working upward"""
-    # There's probably a race condition here.
-    found = False
-    port = START_PORT
-    while not found:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = s.connect_ex(('127.0.0.1', port))
-        logger.debug(result)
-        if result in (61, 111):
-            logger.info("Port %d is available" % port)
-            found = True
-        else:
-            logger.info("Port %d in use" % port)
-            port = port + 1
+    ports = db.session.query(Instance.port).filter(Instance.port.isnot(None))
+    ports = set([x[0] for x in ports.all()])
 
-        s.close()
+    logger.info("-" * 40)
+    logger.info(ports)
+    logger.info("-" * 40)
 
-        if port > START_PORT + 10:
-            raise ValueError("No usable port found")
-    return port
+    for x in range(START_PORT, START_PORT + 4):
+        if x not in ports:
+            return x
+
+    raise ValueError("No usable port found")
 
 
 @celery.task
@@ -144,9 +138,13 @@ def run_it(instance_id):
             db.session.commit()
             return
 
+        port = find_port()
+        outdir = os.path.join(OUTPUT_BASE_DIR, str(port))
+        i.port = port
         i.status = "Building"
+
         db.session.commit()
-        args = ['jekyll', 'build']
+        args = ['jekyll', 'build', '-d', outdir]
         print_args(args)
         try:
             subprocess.check_call(args)
@@ -155,29 +153,16 @@ def run_it(instance_id):
             db.session.commit()
             return
 
-        site_dir = os.path.join(repo_dir, "_site")
-        os.chdir(site_dir)
-        logger.info(site_dir)
+        # site_dir = os.path.join(repo_dir, "_site")
+        # os.chdir(site_dir)
+        logger.info("Site output to " + outdir)
 
-        port = find_port()
-        i.port = port
-        i.status = "Serving"
+        i.status = "Running"
         db.session.commit()
         logger.info("Serving using port %d" % port)
 
-        server_address = ('', port)
-        httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-        httpd.serve_forever()
-
 # Clear the database
 # Instance.query.delete()
-
-# Mark all old session as dead
-try:
-    db.session.query(Instance).update({'status': "Dead", 'port': None})
-    db.session.commit()
-except:
-    pass
 
 if __name__ == '__main__':
     app.run(debug=True)

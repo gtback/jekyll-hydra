@@ -6,3 +6,30 @@ server {
     }
 }
 
+server {
+    listen 4000;
+    location / {
+        root /var/hydra/build/4000;
+    }
+}
+
+server {
+    listen 4001;
+    location / {
+        root /var/hydra/build/4001;
+    }
+}
+
+server {
+    listen 4002;
+    location / {
+        root /var/hydra/build/4002;
+    }
+}
+
+server {
+    listen 4003;
+    location / {
+        root /var/hydra/build/4003;
+    }
+}
