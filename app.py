@@ -62,11 +62,13 @@ def home():
 def kill(id):
     logger.info("Killing instance " + str(id))
     i = db.session.query(Instance).get(id)
+    # Save port for after database is updated.
+    port = i.port
     i.port = None
     i.status = "Killed"
-
-    #TODO: remove files from disk
     db.session.commit()
+
+    shutil.rmtree(os.path.join(OUTPUT_BASE_DIR, str(port)))
 
     return redirect(url_for('home'))
 
