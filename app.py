@@ -9,6 +9,8 @@ import subprocess
 
 from celery import Celery
 from flask import Flask, render_template, redirect, url_for
+from flask.ext.security import (login_required, RoleMixin, Security,
+                                SQLAlchemyUserDatastore, UserMixin)
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask.ext.wtf import Form
 
@@ -41,6 +43,7 @@ if not app.debug:
 
 
 @app.route('/', methods=['GET', 'POST'])
+@login_required
 def home():
     form = SubmitForm()
     if form.validate_on_submit():
@@ -61,6 +64,7 @@ def home():
 
 
 @app.route('/kill/<id>', methods=['POST'])
+@login_required
 def kill(id):
     logger.info("Killing instance " + str(id))
     i = db.session.query(Instance).get(id)
@@ -76,6 +80,7 @@ def kill(id):
 
 
 @app.route('/rebuild/<id>', methods=['POST'])
+@login_required
 def rebuild(id):
     logger.info("Rebuilding instance" + str(id))
     i = db.session.query(Instance).get(id)
@@ -109,6 +114,31 @@ class SubmitForm(Form):
     def validate_key(form, field):
         if field.data != SUBMIT_KEY:
             raise ValidationError("Invalid Submission Key")
+
+
+roles_users = db.Table('roles_users',
+        db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+        db.Column('role_id', db.Integer(), db.ForeignKey('role.id')))
+
+
+class Role(db.Model, RoleMixin):
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255))
+    active = db.Column(db.Boolean())
+    confirmed_at = db.Column(db.DateTime())
+    roles = db.relationship('Role', secondary=roles_users,
+                            backref=db.backref('users', lazy='dynamic'))
+
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
+security = Security(app, user_datastore)
 
 
 def print_args(args):
