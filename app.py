@@ -59,6 +59,7 @@ def home():
 
     return render_template('home.html', form=form, inst=inst)
 
+
 @app.route('/kill/<id>', methods=['POST'])
 def kill(id):
     logger.info("Killing instance " + str(id))
@@ -73,6 +74,7 @@ def kill(id):
 
     return redirect(url_for('home'))
 
+
 @app.route('/rebuild/<id>', methods=['POST'])
 def rebuild(id):
     logger.info("Rebuilding instance" + str(id))
@@ -82,6 +84,7 @@ def rebuild(id):
     run_it.delay(i.id)
 
     return redirect(url_for('home'))
+
 
 class Instance(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -96,6 +99,7 @@ class Instance(db.Model):
     @property
     def link(self):
         return "http://{0}:{1}/".format(HOST_NAME, self.port)
+
 
 class SubmitForm(Form):
     repository = TextField('Repository', validators=[Required()])
