@@ -3,6 +3,7 @@ import logging
 import os
 import tempfile
 import threading
+import shutil
 import socket
 import subprocess
 
