@@ -151,6 +151,8 @@ def run_it(instance_id):
             db.session.commit()
             return
 
+        curdir = os.getcwd()
+        logger.info("Current Directory: {}".format(curdir))
         # Change into the repo directory
         os.chdir(repo_dir)
 
@@ -179,9 +181,10 @@ def run_it(instance_id):
             db.session.commit()
             return
 
-        # site_dir = os.path.join(repo_dir, "_site")
-        # os.chdir(site_dir)
         logger.info("Site output to " + outdir)
+
+        # Change back to original directory (else git gets cranky)
+        os.chdir(curdir)
 
         i.status = "Running"
         db.session.commit()
