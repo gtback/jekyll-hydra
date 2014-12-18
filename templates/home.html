@@ -48,7 +48,7 @@
             <a class="btn btn-sm btn-primary" href="{{ i.link }}">View</a>
             <button type="submit" class="btn btn-sm btn-danger">Kill</button>
           </form>
-        {% elif i.status == "Killed" %}
+        {% elif i.status == "Killed" or i.status == "Error" %}
           <form method="POST" action="{{ url_for('rebuild', id=i.id) }}">
             <button type="submit" class="btn btn-sm btn-success">Rebuild</button>
           </form>
