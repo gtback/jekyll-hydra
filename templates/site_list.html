@@ -1,0 +1,42 @@
+  <h2>Running Sites</h2>
+  {% for site in sites %}
+  {% if loop.first %}
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Repository</th>
+        <th>Branch</th>
+        <th>Status</th>
+        <th>Port</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+  {% endif %}
+      <tr>
+        <td>{{ site.repository }}</td>
+        <td>{{ site.branch }}</td>
+        <td>{{ site.status }}</td>
+        <td>{{ site.port }}</td>
+        <td>
+        {% if editable %}
+          {% if site.status == "Running" %}
+          <form method="POST" action="{{ url_for('kill', id=site.id) }}">
+            <a class="btn btn-sm btn-primary" href="{{ site.link }}">View</a>
+            <button type="submit" class="btn btn-sm btn-danger">Kill</button>
+          </form>
+          {% elif site.status == "Killed" or site.status == "Error" %}
+          <form method="POST" action="{{ url_for('rebuild', id=site.id) }}">
+            <button type="submit" class="btn btn-sm btn-success">Rebuild</button>
+          </form>
+          {% endif %}
+        {% else %}
+          <a class="btn btn-sm btn-primary" href="{{ site.link }}">View</a>
+        {% endif %}
+        </td>
+      </tr>
+  {% if loop.last %}
+    </tbody>
+  </table>
+  {% endif %}
+  {% endfor %}

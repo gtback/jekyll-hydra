@@ -42,9 +42,17 @@ if not app.debug:
     app.logger.addHandler(stream_handler)
 
 
-@app.route('/', methods=['GET', 'POST'])
-@login_required
+@app.route('/', methods=['GET'])
 def home():
+    sites = Instance.query.filter(Instance.port != None,
+                                  Instance.status == "Running")
+
+    return render_template('home.html', sites=sites, editable=False)
+
+
+@app.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin():
     form = SubmitForm()
     if form.validate_on_submit():
         i = Instance(repository=form.repository.data,
@@ -58,9 +66,9 @@ def home():
 
         return redirect(url_for('home'))
 
-    inst = Instance.query.all()
+    sites = Instance.query.all()
 
-    return render_template('home.html', form=form, inst=inst)
+    return render_template('home.html', form=form, sites=sites, editable=True)
 
 
 @app.route('/kill/<id>', methods=['POST'])

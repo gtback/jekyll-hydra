@@ -17,7 +17,8 @@
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="/">Home</a></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/admin">Admin</a></li>
         <li><a href="/logout">Logout</a></li>
       </ul>
     </div><!--/.nav-collapse -->
@@ -28,6 +29,7 @@
 {% block content %}
 <div class="container">
 
+  {% if form %}
   <h2>Make new instance</h2>
   <form action="{{ url_for('home') }}" method="post">
     {{ wtf.form_field(form.repository) }}
@@ -36,44 +38,9 @@
     <button class="btn btn-success" type="submit" title="Submit"><span>Submit</span></button>
     {{ form.csrf_token }}
   </form>
+  {% endif %}
 
-  <h2>Existing instances</h2>
-  {% for i in inst %}
-  {% if loop.first %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Repository</th>
-        <th>Branch</th>
-        <th>Status</th>
-        <th>Port</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-  {% endif %}
-      <tr>
-        <td>{{ i.repository }}</td>
-        <td>{{ i.branch }}</td>
-        <td>{{ i.status }}</td>
-        <td>{{ i.port }}</td>
-        <td>
-        {% if i.status == "Running" %}
-          <form method="POST" action="{{ url_for('kill', id=i.id) }}">
-            <a class="btn btn-sm btn-primary" href="{{ i.link }}">View</a>
-            <button type="submit" class="btn btn-sm btn-danger">Kill</button>
-          </form>
-        {% elif i.status == "Killed" or i.status == "Error" %}
-          <form method="POST" action="{{ url_for('rebuild', id=i.id) }}">
-            <button type="submit" class="btn btn-sm btn-success">Rebuild</button>
-          </form>
-        {% endif %}
-        </td>
-      </tr>
-  {% if loop.last %}
-    </tbody>
-  </table>
-  {% endif %}
-  {% endfor %}
+  {% include "site_list.html" %}
+
 </div>
 {% endblock %}
