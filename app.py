@@ -16,6 +16,7 @@ from flask.ext.wtf import Form
 
 from flask_bootstrap import Bootstrap
 
+from sqlalchemy.sql.expression import asc
 from wtforms.fields import TextField
 from wtforms.validators import Required, ValidationError
 
@@ -44,7 +45,8 @@ if not app.debug:
 @app.route('/', methods=['GET'])
 def home():
     sites = Instance.query.filter(Instance.port != None,
-                                  Instance.status == "Running")
+                                  Instance.status == "Running").order_by(
+                                          asc(Instance.port))
 
     return render_template('home.html', sites=sites, editable=False)
 
