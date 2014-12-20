@@ -25,7 +25,6 @@ app.config.from_pyfile('config.py')
 
 START_PORT = 4000
 HOST_NAME = app.config["HOST"]
-SUBMIT_KEY = app.config["SUBMIT_KEY"]
 OUTPUT_BASE_DIR = "/var/hydra/build/"
 
 logger = logging.getLogger('hydra')
@@ -117,11 +116,6 @@ class Instance(db.Model):
 class SubmitForm(Form):
     repository = TextField('Repository', validators=[Required()])
     branch = TextField('Branch', validators=[Required()])
-    key = TextField('Submit Key', validators=[Required()])
-
-    def validate_key(form, field):
-        if field.data != SUBMIT_KEY:
-            raise ValidationError("Invalid Submission Key")
 
 
 roles_users = db.Table('roles_users',
