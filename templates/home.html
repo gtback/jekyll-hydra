@@ -31,7 +31,7 @@
 
   {% if form %}
   <h2>Make new instance</h2>
-  <form action="{{ url_for('home') }}" method="post">
+  <form action="{{ url_for('admin') }}" method="post">
     {{ wtf.form_field(form.repository) }}
     {{ wtf.form_field(form.branch) }}
     <button class="btn btn-success" type="submit" title="Submit"><span>Submit</span></button>
