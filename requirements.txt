@@ -1,5 +1,5 @@
 celery==5.2.2
-Flask==1.0
+Flask==2.3.2
 Flask-Bootstrap==3.2.0.2
 Flask-Security==1.7.4
 Flask-SQLAlchemy==2.0
